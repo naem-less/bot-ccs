@@ -1,0 +1,38 @@
+{{/*start of configurable values*/}}
+
+{{$limit := 7}}{{/*The account age limit in days. Accounts younger than this will be automuted*/}}
+{{$log_channel := channel ID here}}{{/*channel to send the new account log messages to*/}}
+{{$dm_on_mute := true}}{{/*If the user should me dmd informing them why they were muted*/}}
+{{$reason := "New account automute"}}{{/*Timeout reason*/}}
+
+{{/*end of configurable values*/}}
+
+{{/*Don't touch the code below if you don't know what youre doing*/}}
+{{/*The message that gets dmd to the person*/}}
+{{$dm_notify := cembed
+    "title" "New accounts automute"
+    "description" (print "You got muted in **" .Guild.Name "** automatically. We do this with accounts younger than 7 days.\nYou will be unmuted after 7 days\n-# Leaving the server and rejoining will not bypass this, it'll just extend your current mute time")
+    "color" 0xED2140
+    "timestamp" currentTime
+    "thumbnail" (sdict "url" (.Guild.IconURL "256"))
+}}
+
+{{/*The log message informing mods that a new account joined*/}}
+{{$log_embed := cembed
+    "title" "New account joined"
+    "thumbnail" (sdict "url" (.User.AvatarURL "256"))
+    "fields" (cslice
+        (sdict "name" "Profile" "value" .User.Mention "inline" true)
+        (sdict "name" "Account age" "value" currentUserAgeHuman "inline" true)
+    )
+    "timestamp" currentTime
+    "color" (randInt 999999)
+}}
+
+{{if lt currentUserAgeMinutes (mult $limit 24 60)}}
+    {{sendMessage $log_channel $log_embed}}
+    {{if $dm_on_mute}}
+        {{sendDM $dm_notify}}
+    {{end}}
+    {{$silent := execAdmin "to" .User.ID "7d" $reason}}
+{{end}}
