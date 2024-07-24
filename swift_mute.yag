@@ -1,0 +1,82 @@
+{{/*
+
+Made by naemless.
+This is a take on the swift mute command by enigma. I remade it because enigma's was terrible to read/edit.
+
+Check that the config variables are setup way at the top of the code before complaining the command doesnt work.
+
+*/}}
+
+
+{{/*start of config variables*/}}
+
+{{$user_limit := 10}}{{/*the max amount of users you can mute at a time*/}}
+{{$mute_duration := 600}}{{/*in seconds*/}}
+{{$mute_role_name := "YOUR ROLE NAME HERE"}}{{/*the role name of the role that should be assigned when the command is used*/}}
+{{$log_channel := YOUR CHANNEL ID HERE}}{{/*channel id of the channel usages of this command should be sent to*/}}
+
+{{/*end of config values*/}}
+
+
+{{$purge := 0}}
+{{$users := reFindAll `\d{17,19}` .StrippedMsg}}
+
+{{/*incorrect usage error*/}}
+{{$error_1 := cembed
+    "title" "Incorrect usage"
+    "color" 0xff0000
+    "fields" (cslice 
+        (sdict "name" "Correct usage" "value" "`-sm <Users: mention/id>`\nUse the -p flag followed by a number to purge that amount of messages from the channel\nAliases to the flag are: -p, -purge, -d, -delete")
+    )
+}}
+
+{{/*if you went over the user limit error*/}}
+{{$error_2 := cembed
+    "description" (print "You can't swift mute more than " $user_limit " at once")
+    "color" 0xff0000
+}}
+
+{{/*guard clause for aforementioned errors*/}}
+{{if not .CmdArgs}}
+    {{deleteMessage nil (sendMessageRetID nil $error_1) 15}}
+    {{return}}
+{{else if gt (len $users|toInt) (toInt $user_limit)}}
+    {{deleteMessage nil (sendMessageRetID nil $error_2) 15}}
+    {{return}}
+{{end}}
+
+{{/*initing the purge count and user list*/}}
+{{with reFindAllSubmatches `(?:-d|-delete|-p|-purge) (\d{1,2})` .StrippedMsg}}
+    {{$purge = index . 0 1}}
+{{end}}
+
+{{/*remove duplicate user ids function*/}}
+{{$remove_dup_users := cslice}}
+{{range $user := $users}}
+    {{- if not (in $remove_dup_users $user)}}
+        {{- $remove_dup_users = $remove_dup_users.Append $user}}
+    {{- end}}
+{{- end}}
+
+{{/*the thing that actually mutes people*/}}
+{{$ids := cslice}}
+{{$names := cslice}}
+{{range $id := $remove_dup_users}}
+    {{giveRoleName $id $mute_role_name}}
+    {{takeRoleName $id $mute_role_name $mute_duration}}
+	{{$mem := getMember .}}
+	{{$ids = joinStr " " $ids .}}
+	{{$names = joinStr ", " $names $mem.User.Username}}
+{{end}}
+
+{{/*construct and send log message + purge(if specified)*/}}
+{{$msg := cembed 
+    "description" (printf "%s swift muted **%s**" .User.Username $names)
+    "color" 0x34eb4c
+}}
+
+{{sendMessage $log_channel (complexMessage "content" $ids "embed" $msg)}}
+{{deleteTrigger 0}}
+{{if $purge}}
+    {{execAdmin "clean" $purge}}
+{{end}}
