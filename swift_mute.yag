@@ -3,6 +3,10 @@
 Made by naemless.
 This is a take on the swift mute command by enigma. I remade it because enigma's was terrible to read/edit.
 
+Usage: -sm <Users: mention/id>
+Aditionally you can add the -p flag followed by a number to purge that many messages from chat
+Aliases to -p include: -purge, -d, -delete
+
 Check that the config variables are setup way at the top of the code before complaining the command doesnt work.
 
 */}}
