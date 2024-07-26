@@ -1,9 +1,13 @@
+{{/*
+	Place this code in the join trigger in Notifications and feeds > join
+*/}}
+
 {{/*start of configurable values*/}}
 
 {{$limit := 7}}{{/*The account age limit in days. Accounts younger than this will be automuted*/}}
 {{$log_channel := CHANNEL ID HERE}}{{/*channel to send the new account log messages to*/}}
 {{$dm_on_mute := true}}{{/*If the user should be dmd informing them why they were muted*/}}
-{{$reason := "New account automute"}}{{/*Timeout reason*/}}
+{{$reason := "New account automute"}}{{/*Default imeout reason*/}}
 
 {{/*end of configurable values*/}}
 
@@ -30,9 +34,9 @@
 }}
 
 {{if lt currentUserAgeMinutes (mult $limit 24 60)}}
+	{{execAdmin "to" .User.ID "7d" $reason}}
 	{{sendMessage $log_channel $log_embed}}
 	{{if $dm_on_mute}}
 		{{sendDM $dm_notify}}
 	{{end}}
-	{{execAdmin "to" .User.ID "7d" $reason}}
 {{end}}
