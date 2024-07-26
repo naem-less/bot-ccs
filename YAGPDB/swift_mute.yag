@@ -62,13 +62,11 @@ Check that the config variables are setup way at the top of the code before comp
 {{- end}}
 
 {{/*the thing that actually mutes people*/}}
-{{$ids := cslice}}
 {{$names := cslice}}
 {{range $id := $remove_dup_users}}
     {{giveRoleName $id $mute_role_name}}
     {{takeRoleName $id $mute_role_name $mute_duration}}
 	{{$mem := getMember .}}
-	{{$ids = joinStr " " $ids .}}
 	{{$names = joinStr ", " $names $mem.User.Username}}
 {{end}}
 
@@ -78,7 +76,7 @@ Check that the config variables are setup way at the top of the code before comp
     "color" 0x34eb4c
 }}
 
-{{sendMessage $log_channel (complexMessage "content" $ids "embed" $msg)}}
+{{sendMessage $log_channel (complexMessage "content" (joinStr " " $users) "embed" $msg)}}
 {{deleteTrigger 0}}
 {{if $purge}}
     {{execAdmin "clean" $purge}}
