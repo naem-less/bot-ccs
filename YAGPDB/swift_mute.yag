@@ -22,9 +22,6 @@ Check that the config variables are setup way at the top of the code before comp
 {{/*end of config values*/}}
 
 
-{{$purge := 0}}
-{{$users := reFindAll `\d{17,19}` .StrippedMsg}}
-
 {{/*incorrect usage error*/}}
 {{$error_1 := cembed
     "title" "Incorrect usage"
@@ -50,11 +47,13 @@ Check that the config variables are setup way at the top of the code before comp
 {{end}}
 
 {{/*initing the purge count and user list*/}}
+{{$purge := 0}}
 {{with reFindAllSubmatches `(?:-d|-delete|-p|-purge) (\d{1,2})` .StrippedMsg}}
     {{$purge = index . 0 1}}
 {{end}}
 
 {{/*remove duplicate user ids function*/}}
+{{$users := reFindAll `\d{17,19}` .StrippedMsg}}
 {{$remove_dup_users := cslice}}
 {{range $user := $users}}
     {{- if not (in $remove_dup_users $user)}}
