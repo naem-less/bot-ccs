@@ -1,0 +1,41 @@
+/*
+    Trigger type: on button click
+    Trigger: next|prev
+
+    This is the button handler for the ;channels command. Impliments pagination
+*/
+
+// get the channel data and category ids
+$objectcreate[$getservervar[channelObj]]
+$arraycreate[$ObjectKeys[/];/]
+
+$let[page;$advancedTextSplit[$msg[$channelid;$messageid;embedfootertext];/;1]]
+$let[total;$advancedTextSplit[$msg[$channelid;$messageid;embedfootertext];/;2]]
+
+// increase or decrease page number
+$if[$buttonid==next]
+	 $let[page;$sum[$page;1]]
+	 $if[$page>$total]
+		  $let[page;1]
+	 $endIf
+$elseif[$buttonid==prev]
+	 $let[page;$sub[$page;1]]
+	 $if[$page<1]
+		  $let[page;$total]
+	 $endIf
+$endelseif
+$endIf
+
+// get channels and category to edit the embed
+$let[cat;$arrayget[$page]]
+$arrayClear
+$arrayCreate[$getObjectProperty[$cat];/]
+
+$arrayloop[chnl]{
+	 $arraypush[$chnl;list]
+}
+
+$editEmbed[$channelid;$messageid;
+	 {field:$channel[$cat;name] ($arrayLength):$arrayjoin[#NL#;list]::1}
+	 {footer:$page/$total}
+]
