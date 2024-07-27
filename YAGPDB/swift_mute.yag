@@ -1,10 +1,22 @@
+{{/*
+
+Made by naemless.
+This is a take on the swift mute command by enigma. I remade it because enigma's was terrible to read/edit.
+
+Usage: -sm <Users: mention/id>
+Aditionally you can add the -p flag followed by a number to purge that many messages from chat
+Aliases to -p include: -purge, -d, -delete
+
+Check that the config variables are setup way at the top of the code before complaining the command doesnt work.
+
+*/}}
+
 {{/*start of config variables*/}}
 
-{{$user_limit := 10}}
-{{$purge := 0}}
+{{$user_limit := 10}}{{/*the max amount of users you can mute at a time*/}}
 {{$mute_duration := 600}}{{/*in seconds*/}}
-{{$mute_role_name := "muted"}}
-{{$log_channel := 1251138737501376552}}
+{{$mute_role_name := "YOUR ROLE NAME HERE"}}{{/*the role name of the role that should be assigned when the command is used*/}}
+{{$log_channel := YOUR CHANNEL ID HERE}}{{/*channel id of the channel usages of this command should be sent to*/}}
 
 {{/*end of config values*/}}
 
@@ -45,6 +57,7 @@
 {{end}}
 
 {{/*initing the purge count and user list*/}}
+{{$purge := 0}}
 {{with reFindAllSubmatches `(?:-d|-delete|-p|-purge) (\d{1,2})` .StrippedMsg}}
     {{$purge = index . 0 1}}
 {{end}}
