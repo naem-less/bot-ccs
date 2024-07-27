@@ -22,7 +22,7 @@ Check that the config variables are setup way at the top of the code before comp
 
 {{$users := reFindAll `\d{17,19}` .StrippedMsg}}
 
-{{$error_1 := cembed
+{{$noArgsError := cembed
     "title" "Incorrect usage"
     "color" 0xff0000
     "fields" (cslice 
@@ -30,29 +30,29 @@ Check that the config variables are setup way at the top of the code before comp
     )
 }}
 
-{{$error_2 := cembed
+{{$limitExceededError := cembed
     "description" (print "You can't swift mute more than " $user_limit " at once")
     "color" 0xff0000
 }}
 
-{{$error_3 := cembed
+{{$noUsersError := cembed
  	"description" "Please mention someone/pass their id to swift mute them"
 	"color" 0xff0000
  }}
 
-{{$error_4 := cembed
+{{$invalidUsersError := cembed
 	"description" "One of your ids/mentions is invalid. Please make sure that all the mentions/ids you passed are members that are still in this server"
 	"color" 0xff0000
 }}
 
 {{if not .CmdArgs}}
-    {{deleteMessage nil (sendMessageRetID nil $error_1) 15}}
+    {{deleteMessage nil (sendMessageRetID nil $noArgsError) 15}}
     {{return}}
 {{else if not $users}}
-	{{deleteMessage nil (sendMessageRetID nil $error_3) 15}}
+	{{deleteMessage nil (sendMessageRetID nil $noUsersError) 15}}
 	{{return}}
 {{else if gt (len $users|toInt) (toInt $user_limit)}}
-    {{deleteMessage nil (sendMessageRetID nil $error_2) 15}}
+    {{deleteMessage nil (sendMessageRetID nil $limitExceededError) 15}}
     {{return}}
 {{end}}
 
@@ -73,7 +73,7 @@ Check that the config variables are setup way at the top of the code before comp
 {{$names := cslice}}
 {{range $remove_dup_users}}
 	{{if not (getMember .)}}
-		{{deleteMessage nil (sendMessageRetID nil $error_4)}}
+		{{deleteMessage nil (sendMessageRetID nil $invalidUsersError)}}
 		{{return}}
 	{{end}}
     {{giveRoleName . $mute_role_name}}
