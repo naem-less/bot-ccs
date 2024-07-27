@@ -20,6 +20,7 @@ Check that the config variables are setup way at the top of the code before comp
 
 {{/*end of config values*/}}
 
+{{deleteTrigger 0}}
 {{$users := reFindAll `\d{17,19}` .StrippedMsg}}
 
 {{$noArgsError := cembed
@@ -87,7 +88,6 @@ Check that the config variables are setup way at the top of the code before comp
 }}
 
 {{sendMessage $log_channel (complexMessage "content" (joinStr " " $users) "embed" $msg)}}
-{{deleteTrigger 0}}
 {{if $purge}}
     {{execAdmin "clean" $purge}}
 {{end}}
