@@ -66,13 +66,12 @@ Check that the config variables are setup way at the top of the code before comp
 {{range $id := $remove_dup_users}}
     {{giveRoleName $id $mute_role_name}}
     {{takeRoleName $id $mute_role_name $mute_duration}}
-	{{$mem := getMember .}}
-	{{$names = joinStr ", " $names $mem.User.Username}}
+    {{$names = joinStr ">, <@" $names .}}
 {{end}}
 
 {{/*construct and send log message + purge(if specified)*/}}
 {{$msg := cembed 
-    "description" (printf "%s swift muted **%s**" .User.Username $names)
+    "description" (printf "%s swift muted <@%s>" .User.Username $names)
     "color" 0x34eb4c
 }}
 
