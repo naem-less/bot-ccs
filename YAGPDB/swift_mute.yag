@@ -1,28 +1,15 @@
-{{/*
-
-Made by naemless.
-This is a take on the swift mute command by enigma. I remade it because enigma's was terrible to read/edit.
-
-Usage: -sm <Users: mention/id>
-Aditionally you can add the -p flag followed by a number to purge that many messages from chat
-Aliases to -p include: -purge, -d, -delete
-
-Check that the config variables are setup way at the top of the code before complaining the command doesnt work.
-
-*/}}
-
-
 {{/*start of config variables*/}}
 
-{{$user_limit := 10}}{{/*the max amount of users you can mute at a time*/}}
+{{$user_limit := 10}}
+{{$purge := 0}}
 {{$mute_duration := 600}}{{/*in seconds*/}}
-{{$mute_role_name := "YOUR ROLE NAME HERE"}}{{/*the role name of the role that should be assigned when the command is used*/}}
-{{$log_channel := YOUR CHANNEL ID HERE}}{{/*channel id of the channel usages of this command should be sent to*/}}
+{{$mute_role_name := "muted"}}
+{{$log_channel := 1251138737501376552}}
 
 {{/*end of config values*/}}
 
+{{$users := reFindAll `\d{17,19}` .StrippedMsg}}
 
-{{/*incorrect usage error*/}}
 {{$error_1 := cembed
     "title" "Incorrect usage"
     "color" 0xff0000
@@ -31,29 +18,38 @@ Check that the config variables are setup way at the top of the code before comp
     )
 }}
 
-{{/*if you went over the user limit error*/}}
 {{$error_2 := cembed
     "description" (print "You can't swift mute more than " $user_limit " at once")
     "color" 0xff0000
 }}
 
-{{/*guard clause for aforementioned errors*/}}
+{{$error_3 := cembed
+ 	"description" "Please mention someone/pass their id to swift mute them"
+	"color" 0xff0000
+ }}
+
+{{$error_4 := cembed
+	"description" "One of your ids/mentions is invalid. Please make sure that all the mentions/ids you passed are members that are still in this server"
+	"color" 0xff0000
+}}
+
 {{if not .CmdArgs}}
     {{deleteMessage nil (sendMessageRetID nil $error_1) 15}}
     {{return}}
+{{else if not $users}}
+	{{deleteMessage nil (sendMessageRetID nil $error_3) 15}}
+	{{return}}
 {{else if gt (len $users|toInt) (toInt $user_limit)}}
     {{deleteMessage nil (sendMessageRetID nil $error_2) 15}}
     {{return}}
 {{end}}
 
 {{/*initing the purge count and user list*/}}
-{{$purge := 0}}
 {{with reFindAllSubmatches `(?:-d|-delete|-p|-purge) (\d{1,2})` .StrippedMsg}}
     {{$purge = index . 0 1}}
 {{end}}
 
-{{/*remove duplicate user ids function*/}}
-{{$users := reFindAll `\d{17,19}` .StrippedMsg}}
+
 {{$remove_dup_users := cslice}}
 {{range $user := $users}}
     {{- if not (in $remove_dup_users $user)}}
@@ -61,15 +57,17 @@ Check that the config variables are setup way at the top of the code before comp
     {{- end}}
 {{- end}}
 
-{{/*the thing that actually mutes people*/}}
 {{$names := cslice}}
-{{range $id := $remove_dup_users}}
-    {{giveRoleName $id $mute_role_name}}
-    {{takeRoleName $id $mute_role_name $mute_duration}}
-    {{$names = joinStr ">, <@" $names .}}
+{{range $remove_dup_users}}
+	{{if not (getMember .)}}
+		{{deleteMessage nil (sendMessageRetID nil $error_4)}}
+		{{return}}
+	{{end}}
+    {{giveRoleName . $mute_role_name}}
+    {{takeRoleName . $mute_role_name $mute_duration}}
+	{{$names = joinStr ">, <@" $names .}}
 {{end}}
 
-{{/*construct and send log message + purge(if specified)*/}}
 {{$msg := cembed 
     "description" (printf "%s swift muted <@%s>" .User.Username $names)
     "color" 0x34eb4c
