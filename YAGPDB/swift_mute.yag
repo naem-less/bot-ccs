@@ -1,6 +1,5 @@
 {{/*
 
-Made by naemless.
 This is a take on the swift mute command by enigma. I remade it because enigma's was terrible to read/edit.
 Adds a role to the mentioned users for a set amount of time, like a mute command but this doesnt log anything and is useful sometimes if you need a a bit more time to decide what punishment would be appropriate 
 
