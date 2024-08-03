@@ -1,3 +1,11 @@
+/*
+	Trigger: word
+	Trigger: /^;(view)?channels(list)?/i
+
+	Usage: ;channels
+	Aliases: ;viewchannels ;viewchannelslist ;channelslist
+*/
+
 // create array of all the categories and get the first one's id
 $arrayCreate[$serverChannels[id;category;/];/]
 $let[cat1;$arrayget[1]]
