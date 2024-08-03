@@ -1,0 +1,64 @@
+/*
+  Resends the message you linked to with a message link in chat, basically quoting it
+  Trigger type: word
+  Trigger: /https:\/\/discord(?:app)?\.com\/channels\/\d{17,21}\/\d{17,21}\/\d{17,21}/
+*/
+
+// getting the message link from the content to extract ids to vars
+$let[link;$regexMatch[$message;https:\/\/discord(?:app)?\.com\/channels\/\d{17,21}\/\d{17,21}\/\d{17,21}]]
+$let[server;$regexMatch[$link;\d{17,21};g]]
+$let[chnl;$regexMatch[$link;\d{17,21};g;1]]
+$let[id;$regexMatch[$link;\d{17,21};g;2]]
+
+// for when a message has no message content
+$let[content;No message content]
+$if[$msg[$chnl;$id;content]!=]
+	 $let[content;$msg[$chnl;$id;content]]
+$endIf
+
+$if[$server!=$guild[id]]
+	 $sendMessage[
+		{color:orange}
+		{desc:Message link to <#$chnl>#NL#$customEmoji[warning]Message is not from this server}
+		{footer:Message sent}
+		{timestamp:$creationdate[$id;ms]}
+		  {button:Jump to message:url::$link}
+		  {reply}
+	 ]
+$else
+	 $if[$messageExists[$chnl;$id]==true]
+		  $if[$hasembeds[$chnl;$id]==true]
+			$sendMessage[
+				 {embed:$msg[$chnl;$id;embed]}
+				 {embed:
+					 {author:$username[$msg[$chnl;$id;author]]:$useravatar[$msg[$chnl;$id;author]]}
+					 {desc:Embed from <#$chnl>}
+					 {field:Message content:$content}
+					 {footer:Message sent}
+					 {timestamp:$creationdate[$id;ms]}
+					 {color:$userRoleColor}
+				}
+				{reply}
+				{button:Jump to message:url::$link}
+			]
+		  $else
+			 $sendMessage[
+				 {author:$username[$msg[$chnl;$id;author]]:$useravatar[$msg[$chnl;$id;author]]}
+				{desc:Message from <#$chnl>}
+				{field:Message content:$content}
+				{footer:Message sent}
+				{timestamp:$creationdate[$id;ms]}
+				{color:$userRoleColor}
+				{button:Jump to message:url::$link}
+				{reply}
+			]
+		  $endIf
+	 $else
+		  $sendmessage[
+				{title:Unknown message}
+				{color:red}
+				{desc:$customEmoji[error]The message you are trying to quote doesn't exist or was deleted.}
+				{reply}
+		  ]
+	 $endIf
+$endIf
