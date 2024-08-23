@@ -1,3 +1,9 @@
+{{/*
+	trigger type: interval
+	interval: 6h
+	set the "channel" dropdown to any channel you want
+*/}}
+
 {{$cid := 1276174657392742451}} {{/* the channel id of the leaderboard message */}} 
 {{$mid := 1276200977191403685}} {{/* the message id of the leaderboard message */}} 
 
