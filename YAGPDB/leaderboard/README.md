@@ -4,6 +4,9 @@
 <h2 align="center">Setup</h2>
 <h4>1. Copy all 4 commands to your server's custom commands</h4>
 <p>The setup instructions for each cc are in the first comment, and configurable values (if any) directly below this initial comment</p>
+
+> [!TIP]
+> Remember to save after adding each command
 <h4>2. Run this command in discord in the channel you want the auto updating leaderboard to be</h4>
 
 ```go
