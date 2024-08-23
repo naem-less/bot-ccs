@@ -53,5 +53,5 @@
 
 	{{updateMessage (complexMessageEdit "embed" (cembed $msg) "buttons" $buttons)}}
 {{else}}
-	{{sendResponse nil (complexMessage "embed" (cembed "description" "You cant go to page 0" "color" 16196964) "ephemeral" true)}}
+	{{sendResponse nil (complexMessage "embed" (cembed "description" "You can't go to page 0" "color" 16196964) "ephemeral" true)}}
 {{end}} 
