@@ -4,7 +4,12 @@
 
 	use -rank to view your personal rank on the leaderboard with your message count
 	use -leaderboard/-lb/-top to view the leaderboard, supports pagination and jumping to page numbers
+	page numbers can only go up to the value set in $maxPage
 */}}
+
+{{/*start of config values*/}}
+{{$maxPage := 100}}
+{{/*end of config values*/}}
 
 {{/*extract the command used*/}}
 {{$cmd := ""}}
@@ -23,7 +28,7 @@
 
 {{/*view leaderboard*/}}
 {{if eq $cmd "-lb" "-leaderboard" "-top"}}
-	{{$num := parseArgs 0 (print "`" .ServerPrefix "lb [page]`") (carg "int" "" 0 100)}}
+	{{$num := parseArgs 0 (print "`" .ServerPrefix "lb [page]`") (carg "int" "" 1 $maxPage)}}
 	{{$page := 1}}{{if $num.IsSet 0}}{{$page = $num.Get 0}}{{end}}
 	{{$skip := mult (sub $page 1) 10}}
 	{{$users := dbTopEntries "hm-msg-%" 10 $skip}}
