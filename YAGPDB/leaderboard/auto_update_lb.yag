@@ -1,0 +1,23 @@
+{{$cid := 1276174657392742451}} {{/* the channel id of the leaderboard message */}} 
+{{$mid := 1276200977191403685}} {{/* the message id of the leaderboard message */}} 
+
+{{$lb := index (getMessage $cid $mid).Embeds 0|structToSdict}}
+{{range $k, $v := $lb}} 
+	{{if eq (kindOf $v true) "struct"}} 
+		{{$lb.Set $k (structToSdict $v)}} 
+	{{end}} 
+{{end}} 
+
+
+{{$desc := ""}}{{$rank := 0}}
+{{range dbTopEntries "hm-msg-%" 10 0}}
+{{$rank = add $rank 1}}
+{{$user := index (split .Key "-") 2}}
+{{$count := toInt .Value}}
+	{{$desc = printf "%s%d. <@%s> - %d\n" $desc $rank $user $count}}
+{{end}}
+
+{{$ts := currentTime.Add (toDuration "6h") }}
+{{$lb.Set "Timestamp" $ts}}
+{{$lb.Set "Description" $desc}}
+{{editMessage $cid $mid (cembed $lb)}}
