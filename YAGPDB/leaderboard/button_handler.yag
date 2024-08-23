@@ -1,3 +1,8 @@
+{{/*
+	trigger type: message component
+	trigger: ^hm-
+*/}}
+
 {{$button := .StrippedID}}
 
 {{/* gets the message the buttons are on and converts it to a map */}}
