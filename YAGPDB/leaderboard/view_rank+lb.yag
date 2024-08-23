@@ -1,20 +1,34 @@
+{{/*
+	trigger type: regex
+	trigger: ^-(lb|leaderboard|top|rank)
+
+	use -rank to view your personal rank on the leaderboard with your message count
+	use -leaderboard/-lb/-top to view the leaderboard, supports pagination and jumping to page numbers
+*/}}
+
+{{/*extract the command used*/}}
 {{$cmd := ""}}
 {{with reFind .CCTrigger .Message.Content}}
 	{{$cmd = .}}
 {{end}}
 
+{{/*check if the user has a rank when using -rank*/}}
 {{if and (not (dbGet 0 (print "hm-msg-" .User.ID))) (eq $cmd "-rank")}}
-	{{sendMessage nil (cembed "description" "You have not sent any messages in the hardmode event channel or are not participating")}}
+	{{sendMessage nil (cembed
+		"description" "You have not sent any messages in the hardmode event channel"
+		"color" 0xf72564
+	)}}
 	{{return}}
 {{end}}
 
+{{/*view leaderboard*/}}
 {{if eq $cmd "-lb" "-leaderboard" "-top"}}
 	{{$num := parseArgs 0 (print "`" .ServerPrefix "lb [page]`") (carg "int" "" 0 100)}}
 	{{$page := 1}}{{if $num.IsSet 0}}{{$page = $num.Get 0}}{{end}}
 	{{$skip := mult (sub $page 1) 10}}
 	{{$users := dbTopEntries "hm-msg-%" 10 $skip}}
 	{{if not (len $users)}}
-		{{sendMessage nil (cembed "description" "There are no users on that page or there is no one on the leaderboard yet")}}
+		{{sendMessage nil (cembed "description" "There are no users on that page" "color" 0xf72564)}}
 	{{else}}
 		{{$rank := $skip}}
 		{{$desc := ""}}
@@ -28,29 +42,40 @@
          (cbutton "label" "Previous" "custom_id" "hm-prev" "style" 2 "emoji" (sdict "name" "◀️"))
          (cbutton "label" "Next" "custom_id" "hm-next" "style" 2 "emoji" (sdict "name" "▶️"))
          }}
-		{{sendMessage nil (complexMessage "buttons" $buttons "embed" (cembed "description" $desc "thumbnail" (sdict "url" "https://i.imgur.com/mJ7zu6k.png") "color" 14232643 "footer" (sdict "text" "Page 1") "author" (sdict "name" .Guild.Name "icon_url" (.Guild.IconURL "256") ) ))}}
+		{{sendMessage nil (complexMessage
+			"buttons" $buttons
+			"embed" (cembed
+				"description" $desc
+				"thumbnail" (sdict "url" "https://i.imgur.com/mJ7zu6k.png")
+				"color" 14232643
+				"footer" (sdict "text" "Page 1")
+				"author" (sdict "name" .Guild.Name "icon_url" (.Guild.IconURL "256"))
+			))}}
 	{{end}}
+{{/*view your own rank*/}}
 {{else if eq $cmd "-rank"}}
-	{{$col := 16777215}}{{$p := 0}}{{$r := .Member.Roles}}
+	{{/*get the user's role color*/}}
+	{{$col := 16777215}}{{$pos := 0}}{{$r := .Member.Roles}}
 	{{range .Guild.Roles}}
-		{{- if and (in $r .ID) (.Color) (lt $p .Position)}}
-			{{- $p = .Position}}
-			{{- $col = .Color}}
-		{{- end -}}
+		{{if and (in $r .ID) (.Color) (lt $pos .Position)}}
+			{{$pos = .Position}}
+			{{$col = .Color}}
+		{{end}}
 	{{end}}
 
 	{{$db := dbGet 0 (print "hm-msg-" .User.ID)}}
 	{{$rank := dbRank (sdict "userID" 0 "pattern" "hm-msg-%") 0 (print "hm-msg-" .User.ID)}}
 
-	{{ $ord := "th" }}
-	{{ $cent := toInt (mod $rank 100) }}
-	{{ $dec := toInt (mod $rank 10) }}
-	{{ if not (and (ge $cent 10) (le $cent 19)) }}
-		{{ if eq $dec 1 }} {{ $ord = "st" }}
-		{{ else if eq $dec 2 }} {{ $ord = "nd" }}
-		{{ else if eq $dec 3 }} {{ $ord = "rd" }}
-		{{ end }}
-	{{ end }}
+	{{/*generate the correct ordinal for the rank (1st, 7th, 23rd, etc.)*/}}
+	{{$ord := "th"}}
+	{{$cent := toInt (mod $rank 100)}}
+	{{$dec := toInt (mod $rank 10)}}
+	{{if not (and (ge $cent 10) (le $cent 19))}}
+		{{if eq $dec 1}} {{$ord = "st"}}
+		{{else if eq $dec 2}} {{$ord = "nd"}}
+		{{else if eq $dec 3}} {{$ord = "rd"}}
+		{{end}}
+	{{end}}
 
 	{{sendMessage nil (cembed
                       "author" (sdict "name" .User.Username "icon_url" (.User.AvatarURL "256"))
