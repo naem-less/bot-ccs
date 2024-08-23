@@ -4,8 +4,10 @@
 	set the "channel" dropdown to any channel you want
 */}}
 
+{{/*start of config variables*/}}
 {{$cid := 1276174657392742451}} {{/* the channel id of the leaderboard message */}} 
 {{$mid := 1276200977191403685}} {{/* the message id of the leaderboard message */}} 
+{{/*end of config variables*/}}
 
 {{$lb := index (getMessage $cid $mid).Embeds 0|structToSdict}}
 {{range $k, $v := $lb}} 
