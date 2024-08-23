@@ -1,0 +1,52 @@
+{{$button := .StrippedID}}
+
+{{/* gets the message the buttons are on and converts it to a map */}}
+{{$msg := index .Interaction.Message.Embeds 0|structToSdict}}
+{{range $k, $v := $msg}}
+	{{if eq (kindOf $v true) "struct"}}
+		{{$msg.Set $k (structToSdict $v)}}
+	{{end}}
+{{end}}
+{{with $msg.Author}}{{.Set "Icon_URL" .IconURL}}{{end}}
+{{with $msg.Author}}{{.Set "Icon_URL" .IconURL}}{{end}}
+
+{{/*page number calculation and shit*/}}
+{{$action := "next"}}
+{{if eq $button "prev"}}
+	{{$action = "prev"}}
+{{end}}
+{{$page := index (split ($msg.Footer.Get "Text") " ") 1}} 
+{{if eq $action "prev"}}
+	{{$page = sub $page 1}}
+{{else}}
+	{{$page = add $page 1}}
+{{end}}
+
+{{if ge $page 1}} {{/*to avoid dbTopEntries erroring out due to a negative page number*/}}
+	{{/* everything below is to get the next 10 users and update the message accordingly, along with messages displaying if you cant go up/down a page*/}}
+	{{$skip := mult (sub $page 1) 10}}
+	{{$users := dbTopEntries "hm-msg-%" 10 $skip}}
+	{{if not (len $users)}}
+		{{sendResponse nil (complexMessage "embed" (cembed "description" "There are no users on that page") "ephemeral" true)}}
+		{{return}}
+	{{end}}
+	{{$desc := ""}}
+	{{$rank := $skip}}
+	{{range $users}}
+		{{$rank = add $rank 1}}
+		{{$usr := index (split .Key "-") 2}}
+		{{$count := toInt .Value}}
+		{{$desc = printf "%s%d. <@%s> - `%d`\n" $desc $rank $usr $count}}
+	{{end}}
+	{{$msg.Set "Description" $desc}}
+	{{$msg.Footer.Set "Text" (print "Page " $page)}}
+
+	{{$buttons := cslice
+         (cbutton "label" "Previous" "custom_id" "hm-prev" "style" 2 "emoji" (sdict "name" "◀️"))
+         (cbutton "label" "Next" "custom_id" "hm-next" "style" 2 "emoji" (sdict "name" "▶️"))
+         }}
+
+	{{updateMessage (complexMessageEdit "embed" (cembed $msg) "buttons" $buttons)}}
+{{else}}
+	{{sendResponse nil (complexMessage "embed" (cembed "description" "You cant go to page 0") "ephemeral" true)}}
+{{end}} 
