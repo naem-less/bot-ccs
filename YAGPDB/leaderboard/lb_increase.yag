@@ -1,0 +1,1 @@
+{{$silent := dbIncr 0 (print "hm-msg-" .User.ID) 1}}
