@@ -1,9 +1,9 @@
-{{
+{{/*
         trigger type: Regex
         trigger: \A
 
         IMPORTANT
         Set this command to only run in the hardmode channel in the channel and role restrictions, or else this will track every message sent in the whole server
-}}
+*/}}
 
 {{$silent := dbIncr 0 (print "hm-msg-" .User.ID) 1}}
