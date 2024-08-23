@@ -32,7 +32,7 @@
 	{{$skip := mult (sub $page 1) 10}}
 	{{$users := dbTopEntries "hm-msg-%" 10 $skip}}
 	{{if not (len $users)}}
-		{{sendResponse nil (complexMessage "embed" (cembed "description" "There are no users on that page") "ephemeral" true)}}
+		{{sendResponse nil (complexMessage "embed" (cembed "description" "There are no users on that page" "color" 16196964) "ephemeral" true)}}
 		{{return}}
 	{{end}}
 	{{$desc := ""}}
@@ -53,5 +53,5 @@
 
 	{{updateMessage (complexMessageEdit "embed" (cembed $msg) "buttons" $buttons)}}
 {{else}}
-	{{sendResponse nil (complexMessage "embed" (cembed "description" "You cant go to page 0") "ephemeral" true)}}
+	{{sendResponse nil (complexMessage "embed" (cembed "description" "You cant go to page 0" "color" 16196964) "ephemeral" true)}}
 {{end}} 
