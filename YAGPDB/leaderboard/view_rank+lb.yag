@@ -1,6 +1,6 @@
 {{/*
 	trigger type: regex
-	trigger: ^-(lb|leaderboard|top|rank)
+	trigger: ^-(lb|leaderboard|top|rank)$
 
 	use -rank to view your personal rank on the leaderboard with your message count
 	use -leaderboard/-lb/-top to view the leaderboard, supports pagination and jumping to page numbers
